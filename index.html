@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Board - Create By : CK</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- React & ReactDOM CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel Standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- KOMPONEN IKON PENGGANTI LUCIDE-REACT (INLINE SVG) ---
+    const Heart = ({ className = "", size = 24, fill = "none" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      </svg>
+    );
+
+    const RotateCcw = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>
+    );
+
+    const Sparkles = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+        <path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" />
+      </svg>
+    );
+
+    const Play = ({ className = "", size = 24, fill = "none" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polygon points="5 3 19 12 5 21 5 3" />
+      </svg>
+    );
+
+    const Gift = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <rect x="3" y="8" width="18" height="4" rx="1" />
+        <path d="M12 8v13" />
+        <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
+        <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
+      </svg>
+    );
+
+    const ArrowUp = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="m5 12 7-7 7 7" /><path d="M12 19V5" />
+      </svg>
+    );
+
+    const Cloud = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+      </svg>
+    );
+
+    const Shuffle = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22" />
+        <path d="m18 2 4 4-4 4" /><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
+        <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" /><path d="m18 14 4 4-4 4" />
+      </svg>
+    );
+
+    const Flame = ({ className = "", size = 24, strokeWidth = 2, fill = "none" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+      </svg>
+    );
+
+    const AlertTriangle = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+        <path d="M12 9v4" /><path d="M12 17h.01" />
+      </svg>
+    );
+
+    const Maximize = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+        <path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+      </svg>
+    );
+
+    const Minimize = ({ className = "", size = 24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+        <path d="M3 16h3a2 2 0 0 1 2 2v3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+      </svg>
+    );
+
+    const Trophy = ({ className = "", size = 24, fill = "none" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+      </svg>
+    );
+
+    // --- ICONS CUSTOM PION ---
+    const MaleIcon = ({ className }) => (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <circle cx="8.5" cy="18.5" r="3.5" />
+        <circle cx="15.5" cy="18.5" r="3.5" />
+        <rect x="9.5" y="2" width="5" height="18" rx="2.5" />
+      </svg>
+    );
+
+    const FemaleIcon = ({ className }) => (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M12 2C7 6.5 4.5 10.5 4.5 14C4.5 18 7.5 21.5 12 21.5C16.5 21.5 19.5 18 19.5 14C19.5 10.5 17 6.5 12 2Z" />
+        <line x1="12" y1="8" x2="12" y2="17" stroke="rgba(0,0,0,0.15)" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    );
+
+    // --- 12 SILUET GAYA POSISI PASANGAN YANG JELAS & VARIATIF (SVG) ---
+    const PositionSilhouettes = [
+      // 1. Gaya On Top
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="12" cy="48" r="5" fill="currentColor" stroke="none" />
+          <path d="M18 50 L54 50" />
+          <circle cx="34" cy="16" r="5" fill="currentColor" stroke="none" />
+          <path d="M34 22 L34 38 L24 50 M34 38 L44 50" />
+          <path d="M34 26 L22 46" strokeWidth="3.5" />
+        </svg>
+      ),
+      // 2. Gaya Dari Belakang
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="48" cy="28" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M44 33 L26 33 L22 52 M42 33 L46 52" />
+          <circle cx="16" cy="14" r="5" fill="currentColor" stroke="none" />
+          <path d="M18 20 L22 36 L14 52 M20 26 L32 33" />
+        </svg>
+      ),
+      // 3. Gaya Missionary
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="12" cy="48" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M18 50 L44 50 L52 32" />
+          <circle cx="18" cy="30" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M23 33 L44 44 L56 50 M22 34 L16 48" />
+        </svg>
+      ),
+      // 4. Gaya 69
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="14" cy="46" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M20 48 L48 48 L54 36" />
+          <circle cx="50" cy="32" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M44 30 L18 30 L12 42" />
+        </svg>
+      ),
+      // 5. Gaya Berdiri Angkat Satu Kaki
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="24" cy="12" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M24 18 L24 38 L20 56 M24 38 L30 56" />
+          <circle cx="38" cy="14" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M36 20 L34 38 L38 56 M34 36 L20 32" />
+          <path d="M24 24 L36 26" strokeWidth="3.5" />
+        </svg>
+      ),
+      // 6. Gaya Spooning
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="20" cy="22" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M18 28 C14 38, 18 46, 30 52 L44 54" />
+          <circle cx="34" cy="24" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M32 30 C28 40, 32 46, 44 50 L56 52" />
+          <path d="M20 34 L34 36" strokeWidth="3.5" />
+        </svg>
+      ),
+      // 7. Gaya Lotus
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="24" cy="16" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M22 22 L22 44 L44 48" />
+          <circle cx="38" cy="18" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M38 24 L34 42 L16 44 M22 30 L38 30" />
+        </svg>
+      ),
+      // 8. Gaya Reverse On Top
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="12" cy="48" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M18 50 L54 50" />
+          <circle cx="40" cy="16" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M38 22 L32 38 L46 48 M34 28 L46 36" />
+        </svg>
+      ),
+      // 9. Gaya Berlutut di Depan Pasangan Berdiri
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="22" cy="12" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M22 18 L22 54 M22 24 L36 32" />
+          <circle cx="38" cy="32" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M40 38 L44 50 L54 54 M38 40 L24 36" />
+        </svg>
+      ),
+      // 10. Gaya Tepi Ranjang
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="12" cy="40" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M18 42 L38 42 L44 22" />
+          <circle cx="48" cy="14" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M48 20 L44 40 L46 56 M46 28 L38 42" />
+        </svg>
+      ),
+      // 11. Gaya Kursi
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="22" cy="14" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M22 20 L22 38 L38 38 L38 56" />
+          <circle cx="36" cy="18" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M36 24 L32 38 L26 54 M22 28 L34 28" />
+        </svg>
+      ),
+      // 12. Gaya Arch / Bridge
+      ({ className }) => (
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <circle cx="14" cy="46" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M18 44 Q32 24 46 44 L52 54" />
+          <circle cx="34" cy="16" r="4.5" fill="currentColor" stroke="none" />
+          <path d="M34 22 L32 36 L22 52 M32 36 L42 52" />
+        </svg>
+      )
+    ];
+
+    // --- DATA & KONFIGURASI GAME ---
+    const COLS = 10;
+
+    const SNAKES = {
+      16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 
+      64: 60, 87: 24, 93: 73, 95: 75, 98: 78
+    };
+
+    const LADDERS = {
+      3: 22, 8: 26, 15: 35, 21: 40, 32: 52, 
+      42: 60, 50: 69, 63: 81, 71: 91, 80: 98
+    };
+
+    // --- DATABASE TANTANGAN ---
+    const RESTART_DARES = [
+      "Yang kalah wajib menuruti 1 perintah seksual bebas dari pemenang sekarang!",
+      "Pemenang berhak meminta 'servis' oral selama 2 menit dari yang kalah sebelum game baru!",
+      "Yang kalah harus melepas satu pakaian lagi sebelum menekan tombol Main Lagi!",
+      "Lakukan posisi 69 selama 1 menit sebelum memulai game baru!",
+      "Ciuman panas (French Kiss) selama 1 menit sebagai tanda menyerah!",
+      "Yang kalah harus memijat area intim pemenang selama 2 menit!",
+      "Pemenang boleh meminta pose apapun untuk difoto (koleksi pribadi) dari yang kalah!"
+    ];
+
+    const SECRET_START_DARES = [
+      "Jilat telinganya",
+      "French kiss 2 menit",
+      "Suruh dia rebahan, jilati dan cium seluruh badannya",
+      "Cium dan gigit lehernya",
+      "Pose nakal dan menantang didepannya",
+      "Suruh dia nungging dan mainin pantatnya selama 3 menit",
+      "Belai, Jilat dan cium kakinya sampai pangkal pahanya saja"
+    ];
+
+    const DARES = {
+      romeo: [],
+      juliet: [],
+      any: [
+        "Pangku enak",
+        "Jilat telinganya",
+        "Masukan jarinya ke mulut",
+        "Gigit Manja bagian senstifnya hingga kau puas",
+        "Oralin dia",
+        "Suruh dia Nungging dan oralin dia dari belakang",
+        "Berdirilah dan perintah ia untuk oral",
+        "Main sendiri",
+        "Kamu boleh minta di apain aja",
+        "Kamu boleh ngapain dia apa aja",
+        "French kiss",
+        "Berpelukaaaaan",
+        "penetrasi pelan",
+        "Jilat pelan Mr.P/Ms.V pasangan",
+        "Gesek Mr.P ke Ms.V di luar",
+        "doggie sambil berdiri",
+        "Minta pasangan posisi doggy dan oral kamu",
+        "Minta dia untuk Mijat sensual bebas",
+        "Saling masturbasi sendiri",
+        "Oralin dia tanpa bantuan tangan",
+        "penetrasi dan saling jilat leher",
+        "Masukan dan metokin Mr.P di Ms.V dan langsung cabut",
+        "Romeo mainin dada Juliet",
+        "Jilat dia dari paha sampai bibir",
+        "penetrasi berdiri dan angkat satu kaki Juliet",
+        "Kecup keningnya",
+        "Lakukan penetrasi dengan satu gaya yang kamu ingin kan",
+        "Suruh dia menutup mata dan lakukan semaumu",
+        "Baringkan pasanganmu telentang di ujung ranjang, angkat pinggulnya tinggi, buka kakinya lebar, lalu jilat area intimnya dengan lidah datar sampai basah kuyup mengkilat.",
+        "Suruh pasanganmu duduk di pinggir ranjang, berlutut di antara kedua kakinya, lalu hisap kepala alat kelaminnya kuat seperti sedotan sambil pompa batangnya dan tatap matanya rakus.",
+        "Berbaringlah telentang, tarik pasanganmu ke posisi 69 di atasmu, pegang kepalanya kuat lalu dorong masuk ke dalam mulutmu sambil angkat pinggul.",
+        "Duduklah di wajah pasanganmu dengan lutut di sisi kepala, hadap ke kakinya, lalu gerakkan pinggulmu liar sambil tekan area intimmu ke mulut dan lidahnya.",
+        "Suruh pasanganmu telentang, naiki dadanya dengan posisi straddling, lalu gesekkan putingmu yang keras ke area intimnya sambil memijat dadamu sendiri.",
+        "Posisikan pasanganmu nungging, tarik rambutnya kuat dari belakang seperti tali kekang, lalu jilat punggung dan lehernya dengan ganas.",
+        "Baringkan pasanganmu telentang dengan kaki terbuka lebar, berlutut di antaranya, lalu tekan dan pijat alat kelaminnya dengan telapak tanganmu kasar sambil memutar.",
+        "Naiki tubuh pasanganmu dalam posisi missionary, ludahi putingnya perlahan sampai mengkilat, lalu hisap dan gigit buas bergantian.",
+        "Peluk pasanganmu dari depan sambil berdiri atau tekan ke dinding, remas dadanya kuat dengan dua tanganmu sambil angkat sedikit.",
+        "Posisikan pasanganmu nungging, pukul pantatnya keras bergantian kiri-kanan dengan telapak tangan sampai memerah.",
+        "Suruh pasanganmu berdiri, berlutut di depannya, lalu kulum hanya ujung alat kelaminnya sambil lidahmu berputar-putar di kepala.",
+        "Dalam posisi missionary atau berdiri memeluk, gigit leher pasanganmu kuat sampai meninggalkan bekas sambil remas dada atau pantatnya.",
+        "Naiki pasanganmu dalam posisi cowgirl, gerakkan pinggulmu naik-turun dengan ritme menggoda, percepat lalu perlambat berulang kali sampai pasanganmu gemetar dan mengemis ingin klimaks.",
+        "Baringkan pasanganmu telentang, letakkan kakinya di bahumu, lalu jilat celah intimnya dari anus ke area sensitif paling atas dengan lidah liar dan tekanan kuat.",
+        "Dalam posisi spooning atau missionary, hisap puting pasanganmu kirinya lalu kanan bergantian sambil masukkan dua jarimu ke dalamnya.",
+        "Dudukkan atau baringkan pasanganmu, berlutut di depan, lalu mainkan alat kelaminnya dengan tanganmu yang licin dan gerakan kuat penuh tekanan dari pangkal hingga ujung.",
+        "Naiki tubuh pasanganmu dalam missionary sambil tekan seluruh berat badanmu ke tubuhnya, dada menekan dada, pinggul menekan pinggul.",
+        "Duduk di atas pinggul pasanganmu sambil straddling, mainkan alat kelaminnya dengan tangan dan gesekan tubuhmu secara menggoda dan pelan.",
+        "Suruh pasanganmu telentang, merangkak di atasnya, lalu jilat seluruh tubuhnya mulai dari leher, dada, perut, sampai area intim dan paha dalam.",
+        "Berbaringlah telentang dengan kepala di ujung ranjang, tarik pinggul pasanganmu ke wajahmu lalu paksa gesek area intimnya ke mulut dan lidahmu.",
+        "Suruh pasanganmu berdiri atau menungging ringan, tarik rambut kemaluannya pelan dengan gigimu sambil lidah menjilat kulit di sekitarnya.",
+        "Duduk di pinggir ranjang, ludahi tanganmu banyak-banyak sampai licin, lalu mainkan alat kelamin pasanganmu dengan gerakan cepat dan kuat.",
+        "Dalam posisi 69 atau pasanganmu telentang, remas pantatnya kuat dengan dua tangan sambil hisap alat kelaminnya dalam-dalam.",
+        "Gulingkan pasanganmu ke samping, angkat satu kakinya tinggi, lalu jilat atau masuki dari posisi sideways dengan dalam.",
+        "Naiki pasanganmu dengan kendali penuh, stimulasi titik sensitifnya intens tanpa henti sampai tubuhnya meronta-ronta dan pinggulnya naik turun tak terkendali.",
+        "Berlutut di depan pasanganmu, hisap alat kelaminnya dengan suara berisik 'slurp' keras menunjukkan betapa rakus dan lapar kamu.",
+        "Buka kakinya lebar, jilat area intim pasanganmu dengan tekanan lidah yang berubah-ubah: pelan lebar, cepat ujung, lalu kuat dan datar.",
+        "Suruh pasanganmu berbaring, naiki pahanya dengan posisi thigh riding, gesekkan area intimmu yang basah di sepanjang pahanya sambil meremas dadanya dengan kasar.",
+        "Naiki tubuh pasanganmu dalam cowgirl, pegang lehernya dengan tangan dominan sambil naik-turun liar.",
+        "Dalam posisi 69 atau pasanganmu telentang, kulum bagian bawah alat kelaminnya dan perineum dengan mulut penuh liur dan hisap lembut.",
+        "Suruh pasanganmu telentang atau nungging, pukul area intimnya pelan tapi mengejutkan, lalu segera jilat untuk kenikmatan.",
+        "Saat pasanganmu berkeringat, jilat keringat di leher dan dadanya sambil tanganmu terus memainkan alat kelaminnya.",
+        "Dalam missionary, hisap puting pasanganmu sambil gigit pelan lalu masukkan jarimu keluar-masuk cepat.",
+        "Baringkan pasanganmu telentang, pegang dan buka kakinya selebar mungkin, lalu lakukan apa saja yang kau mau padanya.",
+        "Tarik wajah pasanganmu dekat, cium dalam sambil tarik napasnya, tanganmu meremas pantat atau dada secara kuat.",
+        "Gesekkan alat kelamin pasanganmu ke seluruh tubuhmu — perut, dada, paha, dan wajah — secara bergantian sambil pasanganmu berdiri atau kamu di atas.",
+        "Lakukan stimulasi terus-menerus tanpa ampun di missionary atau saat pasanganmu nungging sampai tubuh pasanganmu kejang, matanya berkaca-kaca, dan menangis kenikmatan.",
+        "Buka kakinya lebar, jilat bagian dalam paha pasanganmu yang sensitif dekat area intim dengan lidah lambat dan basah.",
+        "Suruh pasanganmu berdiri atau duduk, berlutut di depannya, lalu hisap alat kelaminnya sedalam mungkin sampai pangkal dengan mulut basah dan tahan beberapa detik.",
+        "Dalam missionary atau cowgirl, remas dada pasanganmu kasar sambil gerakkan pinggulmu brutal di bawahnya.",
+        "Baringkan pasanganmu telentang, ludahi area intimnya banyak sampai becek, lalu masukkan jarimu dengan gerakan cepat.",
+        "Posisikan pasanganmu nungging, tarik rambutnya keras dari belakang sambil tusuk dalam dan kuat.",
+        "Naiki wajah pasanganmu dengan facesitting menghadap depan, gerakkan pinggulmu liar maju-mundur dan putar.",
+        "Berlutut di depan pasanganmu, hisap dan pompa alat kelaminnya dengan mulut penuh liur secara rakus, basah, dan berisik seperti sedang sangat lapar.",
+        "Tarik wajah pasanganmu dekat, gigit bibir bawahnya sambil remas pantatnya kuat dan tarik ke tubuhmu.",
+        "Naiki pasanganmu dalam posisi cowgirl, gerakkan pinggulmu pelan dan dalam dengan teknik edging berulang, buat pasanganmu hampir mencapai klimaks lalu berhenti, ulangi sampai gila.",
+        "Baringkan pasanganmu telentang, jilat area intimnya dengan pola tak beraturan (lingkaran, zig-zag, naik-turun) agar pasanganmu tak bisa menebak.",
+        "Suruh pasanganmu berlutut di depanmu, pegang kepalanya dengan dua tangan, lalu paksa ritme hisap sesuai keinginanmu.",
+        "Gunakan kombinasi lidah, jari, dan gigitan liar di posisi apa saja sampai pasanganmu mendesah tak terkendali.",
+        "Naiki dada pasanganmu, gesekkan putingmu yang keras dan sensitif ke seluruh area intimnya sambil mendesah panas di telinganya.",
+        "Posisikan pasanganmu nungging, tarik rambutnya keras sambil lidahmu menjilat lubangnya dalam-dalam.",
+        "Tutup mata pasanganmu dengan blindfold, lalu buat pasanganmu tebak-tebakan dengan sentuhan lidah, jari, napas hangat, dan gesekan alat kelamin secara bergantian.",
+        "Berlutut di depan pasanganmu, hisap alat kelaminnya seperti orang kelaparan setengah mati — cepat, basah, dan tanpa henti.",
+        "Saat pasanganmu nungging atau telentang, remas kedua sisi pantatnya kuat dengan dua tangan sambil masukkan jarimu dari belakang.",
+        "Buka area intim pasanganmu lebar, jilat dengan lidahmu yang bergetar cepat dan kuat seperti getaran vibrator sampai pasanganmu menggelinjang.",
+        "Dalam missionary, pukul dada pasanganmu pelan sambil hisap atau gerakkan pinggul brutal.",
+        "Naiki tubuh pasanganmu dengan berat badan penuh dalam cowgirl, gesek pinggul kuat sambil cium dalam.",
+        "Suruh pasanganmu duduk atau berdiri, berlutut di depannya, kulum ujung alat kelaminnya sambil tatap mata tajam.",
+        "Lakukan stimulasi ganas dan tanpa henti di posisi kendali penuh, kombinasikan lidah, jari, dan gerakan pinggul sampai tubuh pasanganmu gemetar hebat dan hampir pingsan karena kenikmatan berlebih.",
+        "Tarik pasanganmu ke pinggir ranjang sampai kepala dan bahunya di ranjang serta kakinya menggantung, berdiri di depannya, lalu lakukan penetrasi atau oral dengan ritme brutal dan dalam.",
+        "Duduklah di kursi menghadap pasanganmu, buka kakimu lebar, lalu mainkan area intimmu sendiri dengan jari sambil tatap matanya dalam dan desah namanya.",
+        "Berdirilah di depan pasanganmu yang berbaring, mainkan alat kelaminmu dan putingmu dengan gerakan lambat dan sensual agar pasanganmu melihat betapa bergairahnya kamu.",
+        "Naiki dada pasanganmu, mainkan putingmu dan area intimmu sendiri dengan dua tangan sambil gesekkan tubuhmu di depan wajahnya.",
+        "Berlutut di antara kaki pasanganmu, mainkan alat kelaminmu dengan gerakan menggoda sambil sesekali menjilat ujung alat kelamin pasanganmu.",
+        "Duduk di pinggir ranjang dengan kaki terbuka lebar menghadap pasanganmu, mainkan area intimmu dalam-dalam sambil mendesah dan katakan betapa inginnya kamu disentuh pasanganmu.",
+        "Berdiri di depan pasanganmu yang duduk bersandar, mainkan area intimmu dengan jari atau mainan sambil goyangkan pinggulmu di depan wajahnya.",
+        "Berbaring di samping pasanganmu, angkat satu kakimu tinggi, lalu mainkan alat kelaminmu dengan gerakan cepat sambil cium lehernya dan bisikkan betapa basahnya kamu.",
+        "Duduk di pangkuan pasanganmu menghadap dia, gesekkan area intimmu yang basah ke tubuhnya sambil mainkan putingmu dan alat kelaminmu sendiri dengan rakus.",
+        "Suruh pasanganmu berbaring diam, berdiri di atas wajahnya, lalu mainkan area intimmu sampai basah sekali dan biarkan cairanmu menetes ke mulut atau wajah pasanganmu.",
+        "Duduk di kursi dengan kaki dinaikkan tinggi dan terbuka lebar, mainkan alat kelaminmu dengan dua tangan secara intens sambil suruh pasanganmu menonton tanpa boleh menyentuh.",
+        "Gesekkan ujung alat kelamin pasanganmu ke area intimmu yang sudah basah tanpa memasukkan, gerakkan pinggulmu pelan sambil tatap matanya dan buat dia merasakan godaan panasnya.",
+        "Naiki pasanganmu dalam posisi cowgirl, gesekkan area intimmu ke alat kelamin pasanganmu naik-turun tanpa memasukkan, ubah kecepatan dari lambat ke cepat sampai pasanganmu menggelinjang.",
+        "Suruh pasanganmu telentang, duduk di atasnya, lalu gesekkan dan mainkan ujung alat kelamin pasanganmu di pintu masuk area intimmu tanpa memasukkan, kontraksikan ototmu di sana.",
+        "Posisikan pasanganmu nungging, gesekkan alat kelaminmu di celah pantat dan area intim pasanganmu dengan gerakan menggoda tanpa penetrasi, tarik rambutnya sambil bisik betapa ingin kamu masuk.",
+        "Dalam posisi missionary, tekan ujung alat kelaminmu ke area intim pasanganmu, dorong sedikit lalu tarik keluar berulang kali, buat pasanganmu memohon untuk penetrasi penuh.",
+        "Duduk di pangkuan pasanganmu menghadap dia, gesekkan area intimmu yang licin ke alat kelamin pasanganmu dengan gerakan melingkar lambat dan menggoda tanpa memasukkan.",
+        "Suruh pasanganmu berdiri, angkat satu kakinya, gesekkan alat kelaminmu ke pintu masuk area intim pasanganmu tanpa masuk sambil cium lehernya dalam-dalam.",
+        "Naiki pasanganmu dalam cowgirl terbalik, gesekkan pantat dan area intimmu ke alat kelamin pasanganmu sambil mainkan diri sendiri, buat pasanganmu hampir gila menunggu.",
+        "Baringkan pasanganmu telentang, naiki wajahnya sebentar lalu geser ke bawah, gesekkan area intimmu ke alat kelamin pasanganmu tanpa masuk sambil edging berulang.",
+        "Posisikan pasanganmu di pinggir ranjang, berdiri di depannya, gesekkan ujung alat kelaminmu di lubang area intim pasanganmu pelan-pelan lalu tarik mundur saat dia mendorong maju.",
+        "Suruh pasanganmu berlutut, dorong kepalanya ke area intimmu, lalu balik posisi dan gesekkan alat kelamin pasanganmu ke pintu masuk area intimmu tanpa memasukkan.",
+        "Dalam spooning, gesekkan alat kelaminmu di antara paha dan area intim pasanganmu tanpa penetrasi, gigit telinganya sambil bisik kata-kata nakal.",
+        "Naiki pasanganmu, masukkan hanya ujung alat kelaminnya ke area intimmu lalu berhenti diam, kontraksikan ototmu kuat-kuat sambil tatap matanya penuh godaan.",
+        "Suruh pasanganmu telentang, duduk di atasnya dan gesekkan area intimmu ke seluruh panjang alat kelamin pasanganmu seperti sedang menunggang tanpa memasukkan.",
+        "Posisikan pasanganmu nungging, gesekkan alat kelaminmu dari belakang di celah pantat dan area intim pasanganmu dengan ritme cepat lalu lambat tanpa penetrasi.",
+        "Buat pasanganmu berbaring, naiki tubuhnya, mainkan puting dan area intim pasanganmu sambil gesekkan alat kelaminmu tepat di pintu masuk tanpa memasukkan sampai dia mengemis.",
+        "Dalam posisi side-entry, gesekkan alat kelaminmu di area intim pasanganmu dengan gerakan panjang dan lambat, masukkan sedikit lalu tarik keluar berulang-ulang.",
+        "Suruh pasanganmu duduk di kursi, duduk di pangkuannya membelakangi, gesekkan area intimmu ke alat kelamin pasanganmu sambil memutar pinggul tanpa penetrasi.",
+        "Baringkan pasanganmu, pegang kedua tangannya di atas kepala, lalu gesekkan area intimmu ke alat kelamin pasanganmu dengan tekanan kuat sambil bilang dia belum boleh masuk.",
+        "Posisikan pasanganmu nungging di pinggir ranjang, gesekkan ujung alat kelaminmu di lubang area intimnya sambil pukul pantatnya pelan dan tahan sampai pasanganmu gemetar.",
+        "Naiki pasanganmu cowgirl, gerakkan pinggulmu maju mundur hanya di ujung alat kelamin pasanganmu saja, buat sensasi memancing yang sangat menyiksa.",
+        "Suruh pasanganmu berbaring diam, duduk di wajahnya sebentar lalu geser ke bawah, gesekkan dan tekan area intimmu ke alat kelamin pasanganmu tanpa masuk.",
+        "Dalam missionary, angkat pinggul pasanganmu, gesekkan alat kelaminmu di seluruh area intim pasanganmu dengan pola tak beraturan sampai pasanganmu memohon untuk ditusuk dalam.",
+        "Berdiri di depan pasanganmu yang duduk di pinggir ranjang, gesekkan alat kelaminmu ke wajah dan mulutnya lalu turun ke area intim tanpa langsung penetrasi.",
+        "Suruh pasanganmu nungging, pegang pinggulnya kuat, gesekkan seluruh batang alat kelaminmu di celah pantat dan area intim pasanganmu dengan gerakan lambat dan basah tanpa memasukkan.",
+        "Naiki pasanganmu, masukkan hanya kepala alat kelamin pasanganmu ke area intimmu, gerakkan pinggulmu kecil-kecil di ujung saja sambil remas dadanya dan edging panjang.",
+        "Duduk di pangkuan pasanganmu, peluk erat, gesekkan area intimmu ke alat kelamin pasanganmu dengan gerakan naik-turun pelan sambil bisik betapa basah dan siapnya kamu.",
+        "Posisikan pasanganmu telentang, naiki pahanya, gesekkan area intimmu yang licin di sepanjang paha dan alat kelamin pasanganmu tanpa penetrasi sampai dia tak tahan.",
+        "Buat pasanganmu berdiri menghadap dinding, angkat satu kakinya, gesekkan alat kelaminmu di pintu masuk area intim pasanganmu dengan gerakan menggoda lama sambil tarik rambutnya.",
+        "Tarik pasanganmu ke tengah ranjang, naiki tubuhnya, gesekkan dan mainkan alat kelamin pasanganmu di area intimmu dengan berbagai kecepatan dan tekanan tanpa memasukkan sampai pasanganmu benar-benar memohon untuk penetrasi dalam."
+      ]
+    };
+
+    // --- KOMPONEN UTAMA ---
+    function UlarTanggaAesthetic() {
+      const [players, setPlayers] = useState([
+        { id: 1, name: 'Romeo', type: 'romeo', pos: 1, color: 'bg-indigo-500 shadow-indigo-300', rolls: 0 },
+        { id: 2, name: 'Juliet', type: 'juliet', pos: 1, color: 'bg-rose-500 shadow-rose-300', rolls: 0 }
+      ]);
+      const [turn, setTurn] = useState(0); 
+      const [diceValue, setDiceValue] = useState(1);
+      const [isRolling, setIsRolling] = useState(false);
+      const [isMoving, setIsMoving] = useState(false); 
+      const [gameLog, setGameLog] = useState("Let the romance begin ✨");
+      const [winner, setWinner] = useState(null);
+      const [activeChallenge, setActiveChallenge] = useState(null);
+      const [pendingTeleport, setPendingTeleport] = useState(null);
+      const [restartDare, setRestartDare] = useState("");
+      const [showRules, setShowRules] = useState(true); 
+      const [gameStarted, setGameStarted] = useState(false); 
+      const [isFullscreen, setIsFullscreen] = useState(false);
+      
+      // Set global berbasis teks tantangan agar 100% tidak pernah keluar dua kali untuk kedua pemain
+      const usedDaresSet = useRef(new Set());
+
+      const getCoords = (num) => {
+        const adjustedNum = num - 1;
+        const row = Math.floor(adjustedNum / COLS);
+        let col = adjustedNum % COLS;
+        const visualRow = 9 - row; 
+        const isEvenRow = row % 2 === 0; 
+        const visualCol = isEvenRow ? col : 9 - col;
+        return { x: visualCol, y: visualRow };
+      };
+
+      const getRandomDare = () => {
+        const rawDares = [...SECRET_START_DARES, ...DARES.any]
+          .filter(d => d && typeof d === 'string' && !d.includes("Isi tantangan"))
+          .map(d => d
+            .replace(/Penuh Nafsumu/gi, 'pasanganmu')
+            .replace(/penuh nafsu/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+          );
+        
+        const uniquePool = Array.from(new Set(rawDares));
+        const availableDares = uniquePool.filter(dareText => !usedDaresSet.current.has(dareText));
+        
+        if (availableDares.length === 0) {
+          return "Semua kartu tantangan habis! Berikan 1 ciuman panas sebagai gantinya!";
+        }
+        
+        const selectedDare = availableDares[Math.floor(Math.random() * availableDares.length)];
+        usedDaresSet.current.add(selectedDare);
+        return selectedDare;
+      };
+
+      const toggleFullScreen = () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().then(() => { setIsFullscreen(true); }).catch(() => {});
+        } else {
+          if (document.exitFullscreen) { document.exitFullscreen(); setIsFullscreen(false); }
+        }
+      };
+
+      useEffect(() => {
+        const handleFullscreenChange = () => { setIsFullscreen(!!document.fullscreenElement); };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      }, []);
+
+      const handleCloseRules = () => { setShowRules(false); };
+
+      const handleStartGame = (startIdx) => {
+        if (startIdx === 'random') {
+          const randomTurn = Math.random() < 0.5 ? 0 : 1;
+          setTurn(randomTurn);
+          setGameLog(`Takdir memilih: ${players[randomTurn].name} jalan duluan! 🎲`);
+        } else {
+          setTurn(startIdx);
+          setGameLog(`${players[startIdx].name} mengambil inisiatif pertama! ✨`);
+        }
+        setGameStarted(true);
+      };
+
+      const handleRollDice = async () => {
+        if (winner || isRolling || activeChallenge || isMoving) return; 
+        setIsRolling(true);
+        setGameLog(`${players[turn].name} rolling...`);
+        let rollCount = 0;
+        const interval = setInterval(() => {
+          setDiceValue(Math.floor(Math.random() * 6) + 1);
+          rollCount++;
+          if (rollCount > 10) {
+            clearInterval(interval);
+            finalizeMove();
+          }
+        }, 100);
+      };
+
+      const finalizeMove = () => {
+        let roll = Math.floor(Math.random() * 6) + 1;
+        const currentPlayer = players[turn];
+
+        // --- LOGIKA RAHASIA (HIDDEN RULE: Minimal 50x lempar dadu untuk masing-masing pemain) ---
+        const isGameReadyToEnd = players[0].rolls >= 50 && players[1].rolls >= 50;
+        if (!isGameReadyToEnd) {
+          while (currentPlayer.pos + roll === 100) {
+            roll = Math.floor(Math.random() * 6) + 1;
+          }
+        }
+
+        setDiceValue(roll);
+        setIsRolling(false);
+        setPlayers(prev => prev.map(p => p.id === currentPlayer.id ? { ...p, rolls: (p.rolls || 0) + 1 } : p));
+        animateMovement(players[turn].id, roll);
+      };
+
+      const animateMovement = async (playerId, steps) => {
+        setIsMoving(true);
+        let currentPlayer = players.find(p => p.id === playerId);
+        let currentPos = currentPlayer.pos;
+        let path = [];
+        
+        // Logika Pantulan Presisi di Kotak 100
+        let tempPos = currentPos;
+        let direction = 1;
+        for (let i = 0; i < steps; i++) {
+          tempPos += direction;
+          if (tempPos === 100 && i < steps - 1) {
+            direction = -1;
+          }
+          path.push(tempPos);
+        }
+
+        for (const stepPos of path) {
+          setPlayers(prev => prev.map(p => p.id === playerId ? { ...p, pos: stepPos } : p));
+          await new Promise(resolve => setTimeout(resolve, 350));
+        }
+
+        const finalPos = tempPos;
+        let isBounce = (currentPos + steps) > 100;
+        let logMessage = isBounce 
+          ? `${currentPlayer.name} kelebihan dadu! Mundur balik ke ${finalPos} 😈` 
+          : `${currentPlayer.name} tiba di ${finalPos}.`;
+
+        if (finalPos === 100) {
+          setWinner(currentPlayer);
+          setGameLog(`✨ ${currentPlayer.name} MENCAPAI KLIMAKS! ✨`);
+          const rDare = RESTART_DARES[Math.floor(Math.random() * RESTART_DARES.length)];
+          setRestartDare(rDare);
+          setIsMoving(false);
+          return;
+        }
+
+        let nextDest = null;
+        let interactionType = null;
+
+        if (SNAKES[finalPos]) {
+          nextDest = SNAKES[finalPos];
+          interactionType = 'snake';
+          logMessage = isBounce 
+            ? `Mundur ke ${finalPos} & kena Ular! Meluncur turun ke ${nextDest} 🥀`
+            : `Oops.. Meluncur turun ke ${nextDest} 🥀`;
+        } else if (LADDERS[finalPos]) {
+          nextDest = LADDERS[finalPos];
+          interactionType = 'ladder';
+          logMessage = isBounce
+            ? `Mundur ke ${finalPos} & dapat Tangga! Naik ke ${nextDest} 🦋`
+            : `Wow.. Terbang ke ${nextDest} 🦋`;
+        }
+
+        setGameLog(logMessage);
+
+        setTimeout(() => {
+          if (finalPos !== 1 && finalPos !== 100) {
+            const dare = getRandomDare();
+            if (nextDest) {
+              setPendingTeleport({ to: nextDest, type: interactionType, playerId });
+              setActiveChallenge({ text: dare, playerId, isTeleportStart: true });
+            } else if (isBounce) {
+              setActiveChallenge({ text: dare, playerId, isBounce: true });
+            } else {
+              setActiveChallenge({ text: dare, playerId });
+            }
+          } else {
+            setIsMoving(false);
+            setTurn(prev => (prev === 0 ? 1 : 0));
+          }
+        }, 500);
+      };
+
+      const handleChallengeComplete = () => {
+        if (!activeChallenge) return;
+        
+        if (pendingTeleport) {
+          const { to, type, playerId } = pendingTeleport;
+          setPlayers(prevPlayers => {
+            const newPlayers = [...prevPlayers];
+            const idx = newPlayers.findIndex(p => p.id === playerId);
+            newPlayers[idx].pos = to;
+            return newPlayers;
+          });
+
+          const msg = type === 'snake' ? "Turun pelan-pelan..." : "Terbang ke atas...";
+          setGameLog(msg);
+          setPendingTeleport(null);
+          setActiveChallenge(null);
+
+          setTimeout(() => {
+            const secondDare = getRandomDare();
+            setActiveChallenge({ text: secondDare, playerId, isTeleportEnd: true });
+          }, 800);
+        } else {
+          setActiveChallenge(null);
+          setIsMoving(false); 
+          
+          let actionVal = 0;
+          if (activeChallenge.text.toLowerCase().includes("mundur 1")) actionVal = -1;
+          if (activeChallenge.text.toLowerCase().includes("maju 1")) actionVal = 1;
+
+          if (actionVal !== 0) {
+            setPlayers(prevPlayers => {
+              const newPlayers = [...prevPlayers];
+              const idx = newPlayers.findIndex(p => p.id === activeChallenge.playerId);
+              let p = newPlayers[idx].pos + actionVal;
+              
+              const isGameReadyToEnd = newPlayers[0].rolls >= 50 && newPlayers[1].rolls >= 50;
+              if (p < 1) p = 1; 
+              if (p > 100) p = 100;
+              if (!isGameReadyToEnd && p === 100) p = 99; 
+
+              newPlayers[idx].pos = p;
+              return newPlayers;
+            });
+          }
+          setTurn(prev => (prev === 0 ? 1 : 0));
+        }
+      };
+
+      const resetGame = () => {
+        setPlayers([
+          { id: 1, name: 'Romeo', type: 'romeo', pos: 1, color: 'bg-indigo-500 shadow-indigo-300', rolls: 0 },
+          { id: 2, name: 'Juliet', type: 'juliet', pos: 1, color: 'bg-rose-500 shadow-rose-300', rolls: 0 }
+        ]);
+        setTurn(0);
+        setDiceValue(1);
+        setWinner(null);
+        setPendingTeleport(null);
+        setGameLog("Permainan Cinta dimulai ulang!");
+        setActiveChallenge(null);
+        setShowRules(true); 
+        setGameStarted(false); 
+        setIsMoving(false);
+        usedDaresSet.current.clear();
+      };
+
+      const renderAestheticLadder = (start, end, index) => {
+        const startPos = getCoords(parseInt(start));
+        const endPos = getCoords(parseInt(end));
+        const x1 = startPos.x + 0.5; const y1 = startPos.y + 0.5;
+        const x2 = endPos.x + 0.5; const y2 = endPos.y + 0.5;
+        const dx = x2 - x1; const dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const offsetX = (dy / len) * 0.12; const offsetY = (-dx / len) * 0.12;
+        const steps = Math.floor(len / 0.3);
+
+        return (
+          <g key={`ladder-${index}`} className="drop-shadow-sm">
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.8)" strokeWidth="0.6" strokeLinecap="round" />
+            <line x1={x1 - offsetX} y1={y1 - offsetY} x2={x2 - offsetX} y2={y2 - offsetY} stroke="#2dd4bf" strokeWidth="0.1" strokeLinecap="round" />
+            <line x1={x1 + offsetX} y1={y1 + offsetY} x2={x2 + offsetX} y2={y2 + offsetY} stroke="#2dd4bf" strokeWidth="0.1" strokeLinecap="round" />
+            {Array.from({ length: steps }).map((_, i) => {
+              const t = (i + 1) / (steps + 1);
+              const sx = (x1 - offsetX) + (x2 - x1) * t;
+              const sy = (y1 - offsetY) + (y2 - y1) * t;
+              const ex = (x1 + offsetX) + (x2 - x1) * t;
+              const ey = (y1 + offsetY) + (y2 - y1) * t;
+              return <line key={i} x1={sx} y1={sy} x2={ex} y2={ey} stroke="#5eead4" strokeWidth="0.08" strokeLinecap="round" />;
+            })}
+          </g>
+        );
+      };
+
+      const renderAestheticSnake = (start, end, index) => {
+        const startPos = getCoords(parseInt(start));
+        const endPos = getCoords(parseInt(end));
+        const x1 = startPos.x + 0.5; const y1 = startPos.y + 0.5; 
+        const x2 = endPos.x + 0.5; const y2 = endPos.y + 0.5; 
+        const mx = (x1 + x2) / 2; const my = (y1 + y2) / 2;
+        const curveOffset = 1.2;
+        const cp1x = mx + (index % 2 === 0 ? curveOffset : -curveOffset); 
+        const colors = ["#fb7185", "#f472b6", "#e879f9", "#38bdf8"];
+        const snakeColor = colors[index % colors.length];
+
+        return (
+          <g key={`snake-${index}`} className="drop-shadow-md">
+            <path d={`M${x1},${y1} Q${cp1x},${my} ${x2},${y2}`} fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="0.5" strokeLinecap="round"/>
+            <path d={`M${x1},${y1} Q${cp1x},${my} ${x2},${y2}`} fill="none" stroke={snakeColor} strokeWidth="0.25" strokeLinecap="round" opacity="0.9"/>
+            <path d={`M${x1},${y1} Q${cp1x},${my} ${x2},${y2}`} fill="none" stroke="white" strokeWidth="0.04" strokeDasharray="0.15" strokeLinecap="round" opacity="0.8"/>
+            <circle cx={x1} cy={y1} r="0.25" fill={snakeColor} stroke="white" strokeWidth="0.05" />
+            <circle cx={x1 - 0.08} cy={y1 - 0.05} r="0.06" fill="white" />
+            <circle cx={x1 + 0.08} cy={y1 - 0.05} r="0.06" fill="white" />
+          </g>
+        );
+      };
+
+      return (
+        <div className="min-h-screen w-full bg-[#fdfbfb] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-rose-100 via-teal-50 to-violet-100 flex flex-col items-center justify-start md:justify-center p-4 font-sans selection:bg-rose-200 overflow-x-hidden text-slate-800">
+          
+          {/* TOMBOL FULL SCREEN */}
+          <div className="absolute top-4 right-4 z-40">
+            <button onClick={toggleFullScreen} className="p-3 bg-white/60 backdrop-blur-lg rounded-full text-slate-500 hover:text-rose-500 hover:bg-white transition-all shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-white/80">
+              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+            </button>
+          </div>
+
+          {/* 1. LAYAR ATURAN */}
+          {showRules && (
+            <div className="fixed inset-0 z-[60] bg-white/40 backdrop-blur-2xl flex items-center justify-center p-4">
+              <div className="bg-white/90 border border-white rounded-[2rem] p-8 max-w-md w-full text-center relative overflow-hidden shadow-[0_20px_60px_rgba(225,29,72,0.15)]">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-400 to-orange-400"></div>
+                <Flame className="w-16 h-16 text-rose-500 mx-auto mb-4 animate-bounce" size={64} strokeWidth={1.5} />
+                
+                <h2 className="text-3xl font-black text-slate-800 mb-2 uppercase tracking-tighter">PERINGATAN KERAS 🔞</h2>
+                <p className="text-rose-400 text-xs mb-6 uppercase tracking-widest font-bold">Baca Dulu Sebelum Main!</p>
+
+                <div className="text-left space-y-3 text-slate-600 text-sm font-medium mb-8 bg-rose-50/50 p-5 rounded-2xl border border-rose-100/50">
+                  <p className="flex gap-3 bg-white p-3 rounded-xl shadow-sm border border-rose-100">
+                    <span className="text-rose-500 font-black text-lg">⚠️</span>
+                    <span className="font-bold text-rose-600">RULE UTAMA: TANGGALKAN SELURUH PAKAIANMU SEKARANG!</span>
+                  </p>
+                  <p className="flex gap-3 px-1">
+                    <span className="text-rose-400 font-black text-lg">1.</span>
+                    <span>Game ini khusus dewasa. Pantang tolak tantangan! Nolak = <b className="text-rose-500">HUKUMAN BERAT</b>.</span>
+                  </p>
+                  <p className="flex gap-3 px-1">
+                    <span className="text-rose-400 font-black text-lg">2.</span>
+                    <span>Finish harus PAS angka 100. Kalo lebih, <b>MUNDUR</b> & Wajib Tantangan!</span>
+                  </p>
+                  <p className="flex gap-3 px-1">
+                    <span className="text-rose-400 font-black text-lg">3.</span>
+                    <span>Durasi setiap tantangan <b className="text-rose-500">BEBAS</b>, tapi maksimal <b className="text-rose-500">5 MENIT</b> agar permainan tetap jalan!</span>
+                  </p>
+                  <p className="flex gap-3 px-1">
+                    <span className="text-rose-400 font-black text-lg">4.</span>
+                    <span>Siapin mental & fisik. Kita main sampe lemes!</span>
+                  </p>
+                </div>
+
+                <button onClick={handleCloseRules} className="w-full py-4 bg-gradient-to-r from-rose-500 to-orange-400 hover:from-rose-600 hover:to-orange-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-rose-200 transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+                  Gue Siap Main! <Play size={18} fill="white"/>
+                </button>
+                <p className="text-slate-400 text-[10px] mt-6 font-mono tracking-widest">CREATE BY : CK</p>
+              </div>
+            </div>
+          )}
+
+          {/* 2. MENU PEMILIHAN GILIRAN */}
+          {!gameStarted && !showRules && (
+            <div className="fixed inset-0 z-50 bg-white/40 backdrop-blur-2xl flex items-center justify-center p-4">
+              <div className="bg-white/90 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] p-8 max-w-md w-full text-center border border-white relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-300 via-purple-300 to-rose-300"></div>
+                <h2 className="text-2xl font-black text-slate-800 mb-2 mt-2">Siapa Jalan Duluan?</h2>
+                <p className="text-slate-500 text-sm mb-8">Pilih inisiator permainan hari ini.</p>
+                
+                <div className="grid grid-cols-1 gap-4">
+                  <button onClick={() => handleStartGame(0)} className="flex items-center justify-between px-6 py-5 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-2xl font-bold group border border-indigo-100 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-md shadow-indigo-200"><MaleIcon className="w-5 h-5"/></div>
+                      <span className="text-lg">Romeo</span>
+                    </div>
+                    <ArrowUp className="opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
+                  </button>
+                  
+                  <button onClick={() => handleStartGame(1)} className="flex items-center justify-between px-6 py-5 bg-rose-50/50 hover:bg-rose-50 text-rose-700 rounded-2xl font-bold group border border-rose-100 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-md shadow-rose-200"><FemaleIcon className="w-5 h-5"/></div>
+                      <span className="text-lg">Juliet</span>
+                    </div>
+                    <ArrowUp className="opacity-0 group-hover:opacity-100 transition-opacity" size={20} />
+                  </button>
+                  
+                  <button onClick={() => handleStartGame('random')} className="flex items-center justify-center gap-2 px-6 py-5 bg-slate-800 text-white rounded-2xl shadow-xl hover:bg-slate-700 transition-all mt-2 font-bold tracking-wide">
+                    <Shuffle size={18} /> Acak Saja
+                  </button>
+                </div>
+                <p className="text-slate-400 text-[10px] mt-8 font-mono tracking-widest uppercase">Create By : CK</p>
+              </div>
+            </div>
+          )}
+
+          {/* 3. LAYAR PEMENANG */}
+          {winner && (
+            <div className="fixed inset-0 z-[70] bg-white/60 backdrop-blur-2xl flex items-center justify-center p-4">
+              <div className="bg-white rounded-[3rem] shadow-[0_30px_100px_rgba(251,146,60,0.2)] max-w-md w-full p-10 text-center relative overflow-hidden border border-white">
+                <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-orange-100 to-transparent opacity-50"></div>
+                
+                <div className="w-24 h-24 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg shadow-orange-200 relative z-10 animate-bounce">
+                  <Trophy size={40} className="text-white" fill="currentColor"/>
+                </div>
+                
+                <h2 className="text-4xl font-black text-slate-800 mb-2 uppercase tracking-tighter relative z-10">
+                  {winner.name} MENANG!
+                </h2>
+                <p className="text-orange-500 text-xs font-bold tracking-widest mb-8 relative z-10">TAPI PERMAINAN BELUM SELESAI...</p>
+
+                <div className="bg-rose-50 border border-rose-100 p-6 rounded-3xl mb-10 relative z-10">
+                  <h3 className="text-rose-400 font-bold text-[10px] uppercase tracking-widest mb-3">HUKUMAN UNTUK YANG KALAH</h3>
+                  <p className="text-xl font-black text-slate-700 leading-snug">"{restartDare}"</p>
+                </div>
+
+                <button 
+                  onClick={resetGame} 
+                  className="w-full py-5 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 hover:-translate-y-1 transition-all shadow-xl shadow-slate-900/20 relative z-10 flex items-center justify-center gap-3 text-lg"
+                >
+                  Sudah Dilakukan! Main Lagi <RotateCcw size={20}/>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* HEADER */}
+          <div className="text-center mt-2 mb-3 lg:mb-4 z-10">
+            <div className="inline-flex items-center justify-center gap-3 px-6 py-2 bg-white/70 backdrop-blur-xl rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.04)] border-2 border-rose-200 mb-2">
+              <Heart className="text-rose-500 w-5 h-5 animate-pulse" size={20} fill="currentColor" />
+              <h1 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-widest">Love Board</h1>
+              <Heart className="text-rose-500 w-5 h-5 animate-pulse" size={20} fill="currentColor" />
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <p className="text-slate-600 text-xs font-semibold tracking-wide">100 Pas atau Mundur 😈</p>
+              <p className="text-slate-400 text-[9px] font-mono tracking-widest uppercase">Create By : CK</p>
+            </div>
+          </div>
+
+          {/* BOARD & CONTROLS CONTAINER */}
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-center w-full h-full lg:px-8 pb-20 md:pb-0 z-10">
+            {/* BOARD DENGAN BORDER KOTAK JELAS & SILUET POSISI */}
+            <div className="relative aspect-square w-full max-w-[88vw] lg:max-w-none lg:h-[68vh] lg:w-[68vh] mx-auto bg-white/80 backdrop-blur-3xl rounded-[2rem] shadow-[0_20px_60px_rgba(225,29,72,0.12)] border-[4px] border-rose-300 overflow-hidden shrink-0 p-3 group">
+              <div className="absolute inset-0 bg-gradient-to-tr from-rose-100/40 via-transparent to-teal-100/40 pointer-events-none"></div>
+              <div className="grid grid-cols-10 grid-rows-10 h-full w-full gap-1 bg-rose-200/70 rounded-[1.25rem] overflow-hidden p-1.5 border-2 border-rose-300 shadow-inner relative z-10">
+                {Array.from({ length: 100 }, (_, i) => {
+                  const row = Math.floor(i / 10);
+                  const normalizedRow = 9 - row;
+                  let displayNum;
+                  if (normalizedRow % 2 === 0) { const col = i % 10; displayNum = (normalizedRow * 10) + (col + 1); } 
+                  else { const col = i % 10; displayNum = (normalizedRow * 10) + (10 - col); }
+                  const isDark = (row + (i % 10)) % 2 !== 0;
+                  const cellBg = isDark ? 'bg-white border-rose-300' : 'bg-rose-50/95 border-rose-300/90';
+                  
+                  const SilhouetteComponent = displayNum !== 1 && displayNum !== 100 
+                    ? PositionSilhouettes[displayNum % PositionSilhouettes.length] 
+                    : null;
+                  
+                  return (
+                    <div key={i} className={`relative flex items-center justify-center rounded-[6px] transition-all duration-300 ${cellBg} border-2 shadow-sm hover:shadow-md hover:-translate-y-[1px] hover:z-10 hover:bg-white hover:border-rose-500 group/cell`}>
+                      <span className="absolute top-0.5 left-1 text-[8px] md:text-[10px] lg:text-[11px] text-slate-700 font-black group-hover/cell:text-rose-600 transition-colors z-10 bg-white/70 px-1 rounded">{displayNum}</span>
+                      
+                      {SilhouetteComponent && (
+                        <div className="absolute inset-0 flex items-center justify-center pt-2 opacity-65 group-hover/cell:opacity-100 group-hover/cell:scale-110 transition-all duration-200 pointer-events-none">
+                          <SilhouetteComponent className="w-[72%] h-[72%] text-rose-600 drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]" />
+                        </div>
+                      )}
+
+                      {displayNum === 100 && <Heart className="w-5 h-5 md:w-6 md:h-6 text-rose-500 drop-shadow-sm animate-pulse z-10" fill="currentColor" />}
+                      {displayNum === 1 && <span className="text-[6px] md:text-[8px] font-black text-teal-600 tracking-wider px-1 py-0.5 bg-teal-100/80 border border-teal-300 rounded z-10">START</span>}
+                    </div>
+                  );
+                })}
+              </div>
+              <svg className="absolute inset-0 w-full h-full pointer-events-none p-3 z-20" viewBox="0 0 10 10">
+                {Object.entries(LADDERS).map(([start, end], i) => renderAestheticLadder(start, end, i))}
+                {Object.entries(SNAKES).map(([start, end], i) => renderAestheticSnake(start, end, i))}
+              </svg>
+              <div className="absolute inset-0 w-full h-full pointer-events-none p-3 z-30">
+                {players.map((player, idx) => {
+                  const coords = getCoords(player.pos);
+                  const offset = idx === 0 ? -10 : 10;
+                  return (
+                    <div 
+                      key={player.id} 
+                      className={`absolute w-[6%] h-[6%] md:w-[6.5%] md:h-[6.5%] rounded-full shadow-lg border-[2.5px] border-white flex items-center justify-center transition-all duration-300 ease-linear ${player.color}`} 
+                      style={{ left: `calc(${coords.x * 10}% + 2% + ${offset}px)`, top: `calc(${coords.y * 10}% + 2%)` }}
+                    >
+                      {player.type === 'romeo' ? <MaleIcon className="text-white w-[55%] h-[55%]" /> : <FemaleIcon className="text-white w-[55%] h-[55%]" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* CONTROLS */}
+            <div className="flex-1 w-full max-w-[88vw] md:max-w-xs flex flex-col gap-4 mx-auto lg:mx-0">
+              <div className="bg-white/70 backdrop-blur-xl p-4 rounded-[1.75rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border-2 border-white">
+                <h2 className="text-[10px] font-black text-slate-500 mb-3 tracking-widest uppercase text-center flex items-center justify-center gap-2">
+                  <Sparkles size={12} className="text-rose-400"/> GILIRAN <Sparkles size={12} className="text-rose-400"/>
+                </h2>
+                <div className="flex gap-3">
+                  {players.map((p, idx) => (
+                    <div key={p.id} className={`flex-1 flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 border ${turn === idx ? 'bg-white border-rose-200 shadow-[0_8px_20px_rgba(225,29,72,0.08)] scale-105' : 'bg-white/40 border-transparent opacity-60 grayscale'}`}>
+                      <div className={`w-8 h-8 rounded-full ${p.color} flex items-center justify-center text-white mb-1.5 border-2 border-white shadow-sm`}>
+                        {p.type === 'romeo' ? <MaleIcon className="w-4 h-4"/> : <FemaleIcon className="w-4 h-4"/>}
+                      </div>
+                      <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">{p.name}</span>
+                      <span className="text-xl font-bold text-slate-500 mt-0.5">{p.pos}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-2xl p-5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.05)] border-2 border-white text-center relative overflow-hidden flex flex-col items-center">
+                <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-indigo-400 via-rose-400 to-orange-400"></div>
+                
+                <div className="min-h-[2.75rem] w-full flex items-center justify-center text-slate-700 font-semibold text-xs md:text-sm mb-4 bg-rose-50/60 p-2.5 rounded-xl border border-rose-200/60">
+                  {gameLog}
+                </div>
+                
+                <button 
+                  onClick={handleRollDice} 
+                  disabled={!!winner || !!activeChallenge || isRolling || isMoving || !gameStarted} 
+                  className="w-20 h-20 bg-white rounded-[1.5rem] flex items-center justify-center text-3xl font-black text-slate-800 shadow-[0_8px_25px_rgba(225,29,72,0.12)] border-2 border-rose-200 hover:border-rose-400 hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:scale-100 mb-2 group"
+                >
+                  <span className={isRolling ? "animate-spin text-rose-500" : "bg-gradient-to-br from-rose-500 to-orange-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform"}>
+                    {isRolling ? <RotateCcw size={28}/> : diceValue}
+                  </span>
+                </button>
+                <span className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">Kocok Dadu</span>
+              </div>
+            </div>
+          </div>
+
+          {/* CHALLENGE MODAL */}
+          {activeChallenge && (
+            <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-xl flex items-end md:items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.15)] w-full max-w-sm p-10 text-center border border-white relative overflow-hidden mb-4 md:mb-auto">
+                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-rose-50 to-transparent pointer-events-none"></div>
+                
+                <div className="relative z-10">
+                  <div className="w-20 h-20 mx-auto bg-white rounded-full shadow-[0_10px_30px_rgba(225,29,72,0.1)] flex items-center justify-center mb-6 ring-8 ring-rose-50/50">
+                    {activeChallenge.isTeleportStart ? <Cloud className="text-indigo-400" size={32} /> : 
+                     activeChallenge.isTeleportEnd ? <Sparkles className="text-orange-400" size={32} /> :
+                     activeChallenge.isBounce ? <AlertTriangle className="text-red-500" size={32} /> :
+                     <Gift className="text-rose-500" size={32} />}
+                  </div>
+
+                  <h3 className="text-rose-400 text-[10px] font-black uppercase tracking-[0.25em] mb-4 bg-rose-50 inline-block px-3 py-1 rounded-full">
+                    {activeChallenge.isBounce ? "HUKUMAN MENTAL!" : `UNTUK ${players.find(p => p.id === activeChallenge.playerId)?.name}`}
+                  </h3>
+                  
+                  <p className="text-xl md:text-2xl font-bold text-slate-800 mb-10 leading-tight">
+                    "{activeChallenge.text}"
+                  </p>
+                  
+                  <button onClick={handleChallengeComplete} className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold text-lg shadow-xl shadow-slate-900/20 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+                    {pendingTeleport ? "Lanjutkan" : "Selesai"} <Play size={18} fill="currentColor"/>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<UlarTanggaAesthetic />);
+  </script>
+</body>
+</html>
